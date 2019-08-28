@@ -1,0 +1,3 @@
+[submodule "libUnit"]
+	path = libUnit
+	url = https://github.com/TheDiamondProject/libUnit

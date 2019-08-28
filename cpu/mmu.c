@@ -23,6 +23,7 @@
 #include "cpu/mmu.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
 
 #define MMU_PAGE_DIR_MAX_ENTRIES	1024
 #define MMU_PAGE_TABLE_MAX_ENTRIES 	1024
@@ -124,4 +125,37 @@ void *m68_mmu_page_alloc(uint32_t address)
 	}
 
 	return page;
+}
+
+void *m68_mmu_translate(uint32_t address)
+{
+	uintptr_t page = (uintptr_t)m68_mmu_page_alloc(address);
+	uintptr_t page_offset = (uintptr_t)(address & 0xFFF);
+	return (void *)(page + page_offset);
+}
+
+// MARK: - Write
+
+void m68_mmu_write_byte(uint32_t address, uint8_t value)
+{
+	uint8_t *ptr = m68_mmu_translate(address);
+	*ptr = value;
+}
+
+void m68_mmu_write_word(uint32_t address, uint16_t value)
+{
+	uint8_t *ptr = m68_mmu_translate(address);
+	value = htons(value);
+	ptr[0] = (value >> 8) & 0xFF;
+	ptr[1] = value & 0xFF;
+}
+
+void m68_mmu_write_long(uint32_t address, uint32_t value)
+{
+	uint8_t *ptr = m68_mmu_translate(address);
+	value = htonl(value);
+	ptr[0] = (value >> 24) & 0xFF;
+	ptr[1] = (value >> 16) & 0xFF;
+	ptr[2] = (value >> 8) & 0xFF;
+	ptr[3] = value & 0xFF;
 }

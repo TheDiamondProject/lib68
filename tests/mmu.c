@@ -45,4 +45,34 @@ TEST_CASE(MMU, AllocateDifferentPageReturnsDifferentAddress)
 	ASSERT_NEQ(a, b);
 }
 
+TEST_CASE(MMU, WriteByteToMemory)
+{
+	m68_mmu_initialise();
+
+	uint8_t *page = m68_mmu_page_alloc(0x0000);
+	m68_mmu_write_byte(0x3, 0xCD);
+
+	ASSERT_EQ(page[3], 0xCD);
+}
+
+TEST_CASE(MMU, WriteWordToMemory)
+{
+	m68_mmu_initialise();
+
+	uint16_t *page = m68_mmu_page_alloc(0x0000);
+	m68_mmu_write_word(0x0, 0xDEAD);
+
+	ASSERT_EQ(page[0], 0xDEAD);
+}
+
+TEST_CASE(MMU, WriteLongToMemory)
+{
+	m68_mmu_initialise();
+
+	uint32_t *page = m68_mmu_page_alloc(0x0000);
+	m68_mmu_write_long(0x0, 0xDEADBEEF);
+
+	ASSERT_EQ(page[0], 0xDEADBEEF);
+}
+
 #endif

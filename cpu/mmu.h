@@ -61,4 +61,13 @@ void m68_mmu_destroy(void);
  * allocated. */
 void *m68_mmu_page_alloc(uint32_t address);
 
+/* Write byte to the specified address. */
+void m68_mmu_write_byte(uint32_t address, uint8_t value);
+
+/* Write word to the specified address. */
+void m68_mmu_write_word(uint32_t address, uint16_t value);
+
+/* Write long to the specified address. */
+void m68_mmu_write_long(uint32_t address, uint32_t value);
+
 #endif

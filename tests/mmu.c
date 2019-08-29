@@ -75,4 +75,38 @@ TEST_CASE(MMU, WriteLongToMemory)
 	ASSERT_EQ(page[0], 0xDEADBEEF);
 }
 
+TEST_CASE(MMU, ReadByteFromMemory)
+{
+	m68_mmu_initialise();
+
+	uint8_t *page = m68_mmu_page_alloc(0x0000);
+	page[0] = 0xDE;
+
+	ASSERT_EQ(m68_mmu_read_byte(0x0), 0xDE);
+}
+
+TEST_CASE(MMU, ReadWordFromMemory)
+{
+	m68_mmu_initialise();
+
+	uint8_t *page = m68_mmu_page_alloc(0x0000);
+	page[0] = 0xDE;
+	page[1] = 0xAD;
+
+	ASSERT_EQ(m68_mmu_read_word(0x0), 0xDEAD);
+}
+
+TEST_CASE(MMU, ReadLongFromMemory)
+{
+	m68_mmu_initialise();
+
+	uint8_t *page = m68_mmu_page_alloc(0x0000);
+	page[0] = 0xDE;
+	page[1] = 0xAD;
+	page[2] = 0xBE;
+	page[3] = 0xEF;
+
+	ASSERT_EQ(m68_mmu_read_long(0x0), 0xDEADBEEF);
+}
+
 #endif

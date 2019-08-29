@@ -159,3 +159,25 @@ void m68_mmu_write_long(uint32_t address, uint32_t value)
 	ptr[2] = (value >> 8) & 0xFF;
 	ptr[3] = value & 0xFF;
 }
+
+// MARK: - Read
+
+uint8_t m68_mmu_read_byte(uint32_t address)
+{
+	uint8_t *ptr = m68_mmu_translate(address);
+	return *ptr;
+}
+
+uint16_t m68_mmu_read_word(uint32_t address)
+{
+	uint8_t *ptr = m68_mmu_translate(address);
+	uint16_t value = (ptr[0] << 8) | ptr[1];
+	return value;
+}
+
+uint32_t m68_mmu_read_long(uint32_t address)
+{
+	uint8_t *ptr = m68_mmu_translate(address);
+	uint32_t value = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+	return value;
+}

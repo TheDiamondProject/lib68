@@ -70,4 +70,13 @@ void m68_mmu_write_word(uint32_t address, uint16_t value);
 /* Write long to the specified address. */
 void m68_mmu_write_long(uint32_t address, uint32_t value);
 
+/* Read byte from the specified address. */
+uint8_t m68_mmu_read_byte(uint32_t address);
+
+/* Read word from the specified address. */
+uint16_t m68_mmu_read_word(uint32_t address);
+
+/* Read long from the specified address. */
+uint32_t m68_mmu_read_long(uint32_t address);
+
 #endif

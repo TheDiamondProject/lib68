@@ -20,9 +20,23 @@
  * SOFTWARE.
  */
 
-#include <stddef.h>
-#include "cpu/mmu.h"
+#include <libUnit/unit.h>
+#include "cpu/instruction.h"
 
-// MARK: - Global Variables and References
+#if defined(UNIT_TEST)
 
-union m68_mmu_page_table_entry *MMU_PAGE_DIR = NULL;
+TEST_CASE(InstructionLookup, InvalidOpcode)
+{
+	struct m68_instruction *ins = m68_fetch_instruction_for_opcode(0xFFFF);
+	ASSERT_EQ(ins, NULL);
+}
+
+TEST_CASE(InstructionLookup, ValidABCD)
+{
+	struct m68_instruction *abcd = m68_fetch_instruction_for_opcode(0xCB05);
+	ASSERT_NEQ(abcd, NULL);
+	ASSERT_NEQ(abcd->imp, NULL);
+	ASSERT_EQ_STR(abcd->mnemonic, "ABCD D5,D5");
+}
+
+#endif

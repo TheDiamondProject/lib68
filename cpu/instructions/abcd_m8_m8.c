@@ -20,9 +20,10 @@
  * SOFTWARE.
  */
 
-#include <stddef.h>
-#include "cpu/mmu.h"
+#include "cpu/instruction.h"
+#include "cpu/instructions/abcd.h"
 
-// MARK: - Global Variables and References
-
-union m68_mmu_page_table_entry *MMU_PAGE_DIR = NULL;
+void abcd_m8_m8(void)
+{
+	
+}

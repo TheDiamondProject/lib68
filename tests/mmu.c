@@ -49,38 +49,42 @@ TEST_CASE(MMU, WriteByteToMemory)
 {
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
 	m68_mmu_write_byte(0x3, 0xCD);
 
-	ASSERT_EQ(page[3], 0xCD);
+	ASSERT_EQ(*(ptr + 3), 0xCD);
 }
 
 TEST_CASE(MMU, WriteWordToMemory)
 {
 	m68_mmu_initialise();
 
-	uint16_t *page = m68_mmu_page_alloc(0x0000);
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
 	m68_mmu_write_word(0x0, 0xDEAD);
 
-	ASSERT_EQ(page[0], 0xADDE);
+	ASSERT_EQ(*(ptr + 0), 0xDE);
+	ASSERT_EQ(*(ptr + 1), 0xAD);
 }
 
 TEST_CASE(MMU, WriteLongToMemory)
 {
 	m68_mmu_initialise();
 
-	uint32_t *page = m68_mmu_page_alloc(0x0000);
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
 	m68_mmu_write_long(0x0, 0xDEADBEEF);
 
-	ASSERT_EQ(page[0], 0xEFBEADDE);
+	ASSERT_EQ(*(ptr + 0), 0xDE);
+	ASSERT_EQ(*(ptr + 1), 0xAD);
+	ASSERT_EQ(*(ptr + 2), 0xBE);
+	ASSERT_EQ(*(ptr + 3), 0xEF);
 }
 
 TEST_CASE(MMU, ReadByteFromMemory)
 {
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xDE;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xDE;
 
 	ASSERT_EQ(m68_mmu_read_byte(0x0), 0xDE);
 }
@@ -89,24 +93,24 @@ TEST_CASE(MMU, ReadWordFromMemory)
 {
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xDE;
-	page[1] = 0xAD;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xDE;
+	*(ptr + 1) = 0xAD;
 
-	ASSERT_EQ(m68_mmu_read_word(0x0), 0xADDE);
+	ASSERT_EQ(m68_mmu_read_word(0x0), 0xDEAD);
 }
 
 TEST_CASE(MMU, ReadLongFromMemory)
 {
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xDE;
-	page[1] = 0xAD;
-	page[2] = 0xBE;
-	page[3] = 0xEF;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xDE;
+	*(ptr + 1) = 0xAD;
+	*(ptr + 2) = 0xBE;
+	*(ptr + 3) = 0xEF;
 
-	ASSERT_EQ(m68_mmu_read_long(0x0), 0xEFBEADDE);
+	ASSERT_EQ(m68_mmu_read_long(0x0), 0xDEADBEEF);
 }
 
 #endif

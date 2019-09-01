@@ -22,7 +22,6 @@
 
 #if !defined(lib68_Endian)
 #	if defined(__clang__)
-
 #	elif defined(__GNUC__) || defined(__GNUG__)
 #		if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #			define __LITTLE_ENDIAN__
@@ -34,4 +33,17 @@
 #	else
 #		error Compiler not supported.	
 #	endif
+
+#	if defined(__BIG_ENDIAN__)
+#		define TO_BIG_WORD(_V) (_V)
+#		define TO_BIG_LONG(_V) (_V)
+#		define FROM_BIG_WORD(_V) (_V)
+#		define FROM_BIG_LONG(_V) (_V)
+#	elif defined(__LITTLE_ENDIAN__)
+#		define TO_BIG_WORD(_V) (((_V & 0xFF00) >> 8) | ((_V & 0x00FF) << 8))
+#		define TO_BIG_LONG(_V) (((_V & 0xFF000000) >> 24) | ((_V & 0x000000FF) << 24) | ((_V & 0x0000FF00) << 8) | ((_V & 0x00FF0000) >> 8))
+#		define FROM_BIG_WORD(_V) TO_BIG_WORD((_V))
+#		define FROM_BIG_LONG(_V) TO_BIG_LONG((_V))
+#	endif
+
 #endif

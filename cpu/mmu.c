@@ -28,6 +28,56 @@
 #define MMU_PAGE_DIR_MAX_ENTRIES	1024
 #define MMU_PAGE_TABLE_MAX_ENTRIES 	1024
 
+// MARK: - Endian Swap Functions
+
+#if defined(__BIG_ENDIAN__)
+
+static inline uint16_t swap_host_word(uint16_t v)
+{
+	return v;
+}
+
+static inline uint32_t swap_host_long(uint32_t v)
+{
+	return v;
+}
+
+static inline uint16_t swap_mmu_word(uint16_t v)
+{
+	return v;
+}
+
+static inline uint32_t swap_mmu_long(uint32_t v)
+{
+	return v;
+}
+
+#elif defined(__LITTLE_ENDIAN__)
+
+static inline uint16_t swap_host_word(uint16_t v)
+{
+	return ((v >> 8) & 0xFF) | ((v & 0xFF) << 8);
+}
+
+static inline uint32_t swap_host_long(uint32_t v)
+{
+	return ((v >> 24) & 0xFF) | ((v >> 8) & 0xFF00) | ((v << 8) & 0xFF0000) | ((v << 24) & 0xFF000000);
+}
+
+static inline uint16_t swap_mmu_word(uint16_t v)
+{
+	return swap_host_word(v);
+}
+
+static inline uint32_t swap_mmu_long(uint32_t v)
+{
+	return swap_host_long(v);
+}
+
+#else
+#	error Unknown architecture - unable to compile for.
+#endif
+
 // MARK: - Initialisation & Destruction
 
 int m68_mmu_initialise(void)
@@ -145,19 +195,19 @@ void m68_mmu_write_byte(uint32_t address, uint8_t value)
 void m68_mmu_write_word(uint32_t address, uint16_t value)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
-	value = htons(value);
-	ptr[0] = (value >> 8) & 0xFF;
-	ptr[1] = value & 0xFF;
+	value = swap_host_word(value);
+	*(ptr + 1) = (value >> 8);
+	*(ptr + 0) = value;
 }
 
 void m68_mmu_write_long(uint32_t address, uint32_t value)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
-	value = htonl(value);
-	ptr[0] = (value >> 24) & 0xFF;
-	ptr[1] = (value >> 16) & 0xFF;
-	ptr[2] = (value >> 8) & 0xFF;
-	ptr[3] = value & 0xFF;
+	value = swap_host_long(value);
+	*(ptr + 3) = (value >> 24);
+	*(ptr + 2) = (value >> 16);
+	*(ptr + 1) = (value >> 8);
+	*(ptr + 0) = value;
 }
 
 // MARK: - Read
@@ -172,12 +222,12 @@ uint16_t m68_mmu_read_word(uint32_t address)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
 	uint16_t value = (ptr[0] << 8) | ptr[1];
-	return value;
+	return swap_mmu_word(value);
 }
 
 uint32_t m68_mmu_read_long(uint32_t address)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
 	uint32_t value = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
-	return value;
+	return swap_mmu_long(value);
 }

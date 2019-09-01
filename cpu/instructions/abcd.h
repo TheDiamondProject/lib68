@@ -26,6 +26,17 @@
 #if !defined(lib68_Instruction_ABCD)
 #define lib68_Instruction_ABCD
 
+union m68_abcd_opcode {
+	uint16_t value;
+	struct {
+		uint16_t Ry:3;
+		uint16_t rm:1;
+		uint16_t unused_1:5;
+		uint16_t Rx:3;
+		uint16_t unused_2:4;
+	} field;
+};
+
 void abcd_dn_dn(void);
 void abcd_m8_m8(void);
 

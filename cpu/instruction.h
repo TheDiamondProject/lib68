@@ -23,6 +23,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include "cpu/cpu.h"
+#include "cpu/mmu.h"
+
 #if !defined(lib68_InstructionLookup)
 #define lib68_InstructionLookup
 

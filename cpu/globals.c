@@ -22,7 +22,9 @@
 
 #include <stddef.h>
 #include "cpu/mmu.h"
+#include "cpu/cpu.h"
 
 // MARK: - Global Variables and References
 
 union m68_mmu_page_table_entry *MMU_PAGE_DIR = NULL;
+struct M68000 CPU68 = { 0 };

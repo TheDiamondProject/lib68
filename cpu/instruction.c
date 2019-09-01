@@ -21,6 +21,7 @@
  */
 
 #include <stddef.h>
+#include "cpu/cpu.h"
 #include "cpu/mmu.h"
 #include "cpu/instruction.h"
 #include "cpu/instructions/abcd.h"
@@ -31,6 +32,12 @@ struct m68_instruction *m68_fetch_instruction_for_opcode(uint16_t opcode)
 {
 	struct m68_instruction *instruction = &m68_instruction_table[opcode];
 	return instruction->mnemonic ? instruction : NULL;
+}
+
+struct m68_instruction *m68_fetch_instruction(void)
+{
+	uint16_t opcode = m68_mmu_read_word(CPU68.PC.value);
+	return m68_fetch_instruction_for_opcode(opcode);
 }
 
 // MARK: - Instruction Look Up Table

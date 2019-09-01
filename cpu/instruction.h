@@ -44,4 +44,7 @@ extern struct m68_instruction m68_instruction_table[M68_MAX_AVAILABLE_INSTRUCTIO
 /* Fetch the Instruction Structure for the instruction denoted by the opcode. */
 struct m68_instruction *m68_fetch_instruction_for_opcode(uint16_t);
 
+/* Fetch the Instruction Structure for the instruction referenced by the PC. */
+struct m68_instruction *m68_fetch_instruction(void);
+
 #endif

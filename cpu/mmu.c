@@ -21,6 +21,7 @@
  */
 
 #include "cpu/mmu.h"
+#include "cpu/endian.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
@@ -58,7 +59,7 @@ void m68_mmu_destroy(void)
 			}
 
 			/* Fetch the page table */
-			union m68_mmu_page_entry *PAGE_TABLE = (void *)(MMU_PAGE_DIR[i].field.address << 4);
+			union m68_mmu_page_entry *PAGE_TABLE = (void *)((uintptr_t)MMU_PAGE_DIR[i].field.address << 4);
 
 			/* Iterate over all pages in the table */
 			for (int j = 0; j < MMU_PAGE_TABLE_MAX_ENTRIES; ++j) {
@@ -67,7 +68,7 @@ void m68_mmu_destroy(void)
 				}
 
 				/* Fetch the page */
-				void *PAGE = (void *)(PAGE_TABLE[i].field.address << 4);
+				void *PAGE = (void *)((uintptr_t)PAGE_TABLE[i].field.address << 4);
 				free(PAGE);
 			}
 
@@ -102,10 +103,10 @@ void *m68_mmu_page_alloc(uint32_t address)
 			table = (void *)address;
 		}
 
-		MMU_PAGE_DIR[dir_idx].field.address = (address >> 2) & ~0xF;
+		MMU_PAGE_DIR[dir_idx].field.address = (address >> 2);
 		MMU_PAGE_DIR[dir_idx].field.present = 1;
 	} else {
-		table = (void *)(MMU_PAGE_DIR[dir_idx].field.address << 2);
+		table = (void *)((uintptr_t)MMU_PAGE_DIR[dir_idx].field.address << 2);
 	}
 
 	/* Now check for the presence of the desired page in the table. If the page
@@ -118,10 +119,10 @@ void *m68_mmu_page_alloc(uint32_t address)
 			page = (void *)address;
 		}
 
-		table[table_idx].field.address = (address >> 2) & ~0xF;
+		table[table_idx].field.address = (address >> 2);
 		table[table_idx].field.present = 1;
 	} else {
-		page = (void *)(table[table_idx].field.address << 2);
+		page = (void *)((uintptr_t)table[table_idx].field.address << 2);
 	}
 
 	return page;
@@ -145,19 +146,19 @@ void m68_mmu_write_byte(uint32_t address, uint8_t value)
 void m68_mmu_write_word(uint32_t address, uint16_t value)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
-	value = htons(value);
-	ptr[0] = (value >> 8) & 0xFF;
-	ptr[1] = value & 0xFF;
+	value = TO_BIG_WORD(value);
+	*(ptr + 1) = (value >> 8);
+	*(ptr + 0) = value;
 }
 
 void m68_mmu_write_long(uint32_t address, uint32_t value)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
-	value = htonl(value);
-	ptr[0] = (value >> 24) & 0xFF;
-	ptr[1] = (value >> 16) & 0xFF;
-	ptr[2] = (value >> 8) & 0xFF;
-	ptr[3] = value & 0xFF;
+	value = TO_BIG_LONG(value);
+	*(ptr + 3) = (value >> 24);
+	*(ptr + 2) = (value >> 16);
+	*(ptr + 1) = (value >> 8);
+	*(ptr + 0) = value;
 }
 
 // MARK: - Read
@@ -171,13 +172,13 @@ uint8_t m68_mmu_read_byte(uint32_t address)
 uint16_t m68_mmu_read_word(uint32_t address)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
-	uint16_t value = (ptr[0] << 8) | ptr[1];
-	return value;
+	uint16_t value = (*(ptr + 1) << 8) | *(ptr + 0);
+	return FROM_BIG_WORD(value);
 }
 
 uint32_t m68_mmu_read_long(uint32_t address)
 {
 	uint8_t *ptr = m68_mmu_translate(address);
-	uint32_t value = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
-	return value;
+	uint32_t value = (*(ptr + 3) << 24) | (*(ptr + 2) << 16) | (*(ptr + 1) << 8) | *(ptr + 0);
+	return FROM_BIG_LONG(value);
 }

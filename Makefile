@@ -30,7 +30,8 @@ run-all-tests: lib68-test-target
 
 .PHONY: clean
 clean:
-	-rm -v $(TEST-OBJECTS) $(LIB-OBJECTS) lib68.a
+	-rm -v $(TEST-OBJECTS) $(LIB-OBJECTS) lib68.a libUnit/unit.o
+	-make -C libUnit clean
 
 # Test Target Related
 

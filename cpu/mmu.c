@@ -21,6 +21,7 @@
  */
 
 #include "cpu/mmu.h"
+#include "cpu/endian.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <arpa/inet.h>

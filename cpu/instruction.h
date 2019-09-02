@@ -20,11 +20,34 @@
  * SOFTWARE.
  */
 
-#include <stddef.h>
-#include "cpu/mmu.h"
+#include <stdint.h>
+#include <sys/types.h>
+
 #include "cpu/cpu.h"
+#include "cpu/mmu.h"
 
-// MARK: - Global Variables and References
+#if !defined(lib68_InstructionLookup)
+#define lib68_InstructionLookup
 
-union m68_mmu_page_table_entry *MMU_PAGE_DIR = NULL;
-struct M68000 CPU68 = { 0 };
+#define M68_MAX_AVAILABLE_INSTRUCTIONS	0x10000
+
+/* Instruction Definition Structure 
+ * This helps with lookup of instruction implementation functions and mnemonics
+ * for easy identification. */
+struct m68_instruction {
+	const char *mnemonic;
+	void(*imp)(void);
+};
+
+/* Instruction Look Up Table 
+ * This table is defined else where, but the symbol is globally accessible. 
+ * This is primarily for test purposes. */
+extern struct m68_instruction m68_instruction_table[M68_MAX_AVAILABLE_INSTRUCTIONS];
+
+/* Fetch the Instruction Structure for the instruction denoted by the opcode. */
+struct m68_instruction *m68_fetch_instruction_for_opcode(uint16_t);
+
+/* Fetch the Instruction Structure for the instruction referenced by the PC. */
+struct m68_instruction *m68_fetch_instruction(void);
+
+#endif

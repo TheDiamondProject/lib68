@@ -20,11 +20,41 @@
  * SOFTWARE.
  */
 
-#include <stddef.h>
-#include "cpu/mmu.h"
+#include <libUnit/unit.h>
 #include "cpu/cpu.h"
+#include "cpu/mmu.h"
+#include "cpu/instruction.h"
 
-// MARK: - Global Variables and References
+#if defined(UNIT_TEST)
 
-union m68_mmu_page_table_entry *MMU_PAGE_DIR = NULL;
-struct M68000 CPU68 = { 0 };
+TEST_CASE(InstructionLookup, FetchCorrectOpcodeFromMemory)
+{
+	m68_mmu_initialise();
+
+	uint8_t *page = m68_mmu_page_alloc(0x0000);
+	page[10] = 0xCB;
+	page[11] = 0x05;
+
+	CPU68.PC.value = 0x000A;
+
+	struct m68_instruction *abcd = m68_fetch_instruction();
+	ASSERT_NEQ(abcd, NULL);
+	ASSERT_NEQ(abcd->imp, NULL);
+	ASSERT_EQ_STR(abcd->mnemonic, "ABCD D5,D5");
+}
+
+TEST_CASE(InstructionLookup, InvalidOpcode)
+{
+	struct m68_instruction *ins = m68_fetch_instruction_for_opcode(0xFFFF);
+	ASSERT_EQ(ins, NULL);
+}
+
+TEST_CASE(InstructionLookup, ValidABCD)
+{
+	struct m68_instruction *abcd = m68_fetch_instruction_for_opcode(0xCB05);
+	ASSERT_NEQ(abcd, NULL);
+	ASSERT_NEQ(abcd->imp, NULL);
+	ASSERT_EQ_STR(abcd->mnemonic, "ABCD D5,D5");
+}
+
+#endif

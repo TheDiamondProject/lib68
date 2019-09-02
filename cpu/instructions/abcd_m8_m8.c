@@ -25,5 +25,25 @@
 
 void abcd_m8_m8(void)
 {
-	
+	union m68_abcd_opcode opcode = { m68_mmu_read_word(CPU68.PC.value) };
+
+	uint8_t Rx = opcode.field.Rx;
+	uint8_t Ry = opcode.field.Ry;
+	uint8_t Vx = m68_mmu_read_byte(--CPU68.A[Rx].value);
+	uint8_t Vy = m68_mmu_read_byte(--CPU68.A[Ry].value);
+	uint8_t X = CPU68.CCR.bitmask.user.X;
+
+	uint8_t r = Vx + Vy + X;
+	uint8_t bc = ((Vx & Vy) | (~r & Vx) | (~r & Vy)) & 0x88;
+	uint8_t dc = (((r + 0x66) ^ r) & 0x110) >> 1;
+	uint8_t corf = (bc | dc) - ((bc | dc) >> 2);
+	uint8_t rr = r + corf;
+
+	m68_mmu_write_byte(CPU68.A[Ry].value, rr);
+	     
+	CPU68.CCR.bitmask.user.C = (bc | (r & ~rr)) >> 7;
+	CPU68.CCR.bitmask.user.X = CPU68.CCR.bitmask.user.C;
+	CPU68.CCR.bitmask.user.V = (~r && r) >> 7;
+	CPU68.CCR.bitmask.user.Z &= (rr == 0);
+	CPU68.CCR.bitmask.user.N = rr >> 7;
 }

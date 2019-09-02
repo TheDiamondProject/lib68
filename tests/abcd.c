@@ -33,9 +33,9 @@ TEST_CASE(ABCD, DataRegisters_ExtendBitClear_NoCarry_NoneZero_CorrectResult)
 	// Configure the operation in memory
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xC1;
-	page[1] = 0x01;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x01;
 
 	// Configure the CPU registers.
 	CPU68.PC.value = 0x0000;
@@ -59,9 +59,9 @@ TEST_CASE(ABCD, DataRegisters_ExtendBitSet_NoCarry_NoneZero_CorrectResult)
 	// Configure the operation in memory
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xC1;
-	page[1] = 0x01;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x01;
 
 	// Configure the CPU registers.
 	CPU68.PC.value = 0x0000;
@@ -85,9 +85,9 @@ TEST_CASE(ABCD, DataRegisters_ExtendBitClear_Carry_NoneZero_CorrectResult)
 	// Configure the operation in memory
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xC1;
-	page[1] = 0x01;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x01;
 
 	// Configure the CPU registers.
 	CPU68.PC.value = 0x0000;
@@ -111,9 +111,9 @@ TEST_CASE(ABCD, DataRegisters_ExtendBitSet_Carry_NoneZero_CorrectResult)
 	// Configure the operation in memory
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xC1;
-	page[1] = 0x01;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x01;
 
 	// Configure the CPU registers.
 	CPU68.PC.value = 0x0000;
@@ -137,9 +137,9 @@ TEST_CASE(ABCD, DataRegisters_ExtendBitSet_Carry_Zero_CorrectResult)
 	// Configure the operation in memory
 	m68_mmu_initialise();
 
-	uint8_t *page = m68_mmu_page_alloc(0x0000);
-	page[0] = 0xC1;
-	page[1] = 0x01;
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x01;
 
 	// Configure the CPU registers.
 	CPU68.PC.value = 0x0000;
@@ -153,6 +153,158 @@ TEST_CASE(ABCD, DataRegisters_ExtendBitSet_Carry_Zero_CorrectResult)
 
 	ASSERT_EQ(CPU68.D[0].value, 0x90);
 	ASSERT_EQ(CPU68.D[1].value, 0x00);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.X, 1);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.Z, 1);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.C, 1);
+}
+
+// MARK: - ABCD -(An),-(An)
+
+TEST_CASE(ABCD, IndirectMemory_ExtendBitClear_NoCarry_NoneZero_CorrectResult)
+{
+	// Configure the operation in memory
+	m68_mmu_initialise();
+
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x09;
+	*(ptr + 0x0F) = 0x46;
+	*(ptr + 0x1F) = 0x28;
+
+	// Configure the CPU registers.
+	CPU68.PC.value = 0x0000;
+	CPU68.A[0].value = 0x10;
+	CPU68.A[1].value = 0x20;
+	CPU68.CCR.bitmask.user.Z = 1;
+	CPU68.CCR.bitmask.user.X = 0;
+
+	// Perform the operation and check if the results are as expected.
+	abcd_m8_m8();
+
+	ASSERT_EQ(*(ptr + 0x0F), 0x46);
+	ASSERT_EQ(*(ptr + 0x1F), 0x74);
+	ASSERT_EQ(CPU68.A[0].value, 0x0F);
+	ASSERT_EQ(CPU68.A[1].value, 0x1F);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.X, 0);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.Z, 0);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.C, 0);
+}
+
+TEST_CASE(ABCD, IndirectMemory_ExtendBitSet_NoCarry_NoneZero_CorrectResult)
+{
+	// Configure the operation in memory
+	m68_mmu_initialise();
+
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x09;
+	*(ptr + 0x0F) = 0x46;
+	*(ptr + 0x1F) = 0x28;
+
+	// Configure the CPU registers.
+	CPU68.PC.value = 0x0000;
+	CPU68.A[0].value = 0x10;
+	CPU68.A[1].value = 0x20;
+	CPU68.CCR.bitmask.user.Z = 1;
+	CPU68.CCR.bitmask.user.X = 1;
+
+	// Perform the operation and check if the results are as expected.
+	abcd_m8_m8();
+
+	ASSERT_EQ(*(ptr + 0x0F), 0x46);
+	ASSERT_EQ(*(ptr + 0x1F), 0x75);
+	ASSERT_EQ(CPU68.A[0].value, 0x0F);
+	ASSERT_EQ(CPU68.A[1].value, 0x1F);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.X, 0);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.Z, 0);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.C, 0);
+}
+
+TEST_CASE(ABCD, IndirectMemory_ExtendBitClear_Carry_NoneZero_CorrectResult)
+{
+	// Configure the operation in memory
+	m68_mmu_initialise();
+
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x09;
+	*(ptr + 0x0F) = 0x91;
+	*(ptr + 0x1F) = 0x10;
+
+	// Configure the CPU registers.
+	CPU68.PC.value = 0x0000;
+	CPU68.A[0].value = 0x10;
+	CPU68.A[1].value = 0x20;
+	CPU68.CCR.bitmask.user.Z = 1;
+	CPU68.CCR.bitmask.user.X = 0;
+
+	// Perform the operation and check if the results are as expected.
+	abcd_m8_m8();
+
+	ASSERT_EQ(*(ptr + 0x0F), 0x91);
+	ASSERT_EQ(*(ptr + 0x1F), 0x01);
+	ASSERT_EQ(CPU68.A[0].value, 0x0F);
+	ASSERT_EQ(CPU68.A[1].value, 0x1F);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.X, 1);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.Z, 0);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.C, 1);
+}
+
+TEST_CASE(ABCD, IndirectMemory_ExtendBitSet_Carry_NoneZero_CorrectResult)
+{
+	// Configure the operation in memory
+	m68_mmu_initialise();
+
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x09;
+	*(ptr + 0x0F) = 0x90;
+	*(ptr + 0x1F) = 0x10;
+
+	// Configure the CPU registers.
+	CPU68.PC.value = 0x0000;
+	CPU68.A[0].value = 0x10;
+	CPU68.A[1].value = 0x20;
+	CPU68.CCR.bitmask.user.Z = 1;
+	CPU68.CCR.bitmask.user.X = 1;
+
+	// Perform the operation and check if the results are as expected.
+	abcd_m8_m8();
+
+	ASSERT_EQ(*(ptr + 0x0F), 0x90);
+	ASSERT_EQ(*(ptr + 0x1F), 0x01);
+	ASSERT_EQ(CPU68.A[0].value, 0x0F);
+	ASSERT_EQ(CPU68.A[1].value, 0x1F);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.X, 1);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.Z, 0);
+	ASSERT_EQ(CPU68.CCR.bitmask.user.C, 1);
+}
+
+TEST_CASE(ABCD, IndirectMemory_ExtendBitSet_Carry_Zero_CorrectResult)
+{
+	// Configure the operation in memory
+	m68_mmu_initialise();
+
+	uint8_t *ptr = m68_mmu_page_alloc(0x0000);
+	*(ptr + 0) = 0xC1;
+	*(ptr + 1) = 0x09;
+	*(ptr + 0x0F) = 0x90;
+	*(ptr + 0x1F) = 0x10;
+
+	// Configure the CPU registers.
+	CPU68.PC.value = 0x0000;
+	CPU68.A[0].value = 0x10;
+	CPU68.A[1].value = 0x20;
+	CPU68.CCR.bitmask.user.Z = 1;
+	CPU68.CCR.bitmask.user.X = 0;
+
+	// Perform the operation and check if the results are as expected.
+	abcd_m8_m8();
+
+	ASSERT_EQ(*(ptr + 0x0F), 0x90);
+	ASSERT_EQ(*(ptr + 0x1F), 0x00);
+	ASSERT_EQ(CPU68.A[0].value, 0x0F);
+	ASSERT_EQ(CPU68.A[1].value, 0x1F);
 	ASSERT_EQ(CPU68.CCR.bitmask.user.X, 1);
 	ASSERT_EQ(CPU68.CCR.bitmask.user.Z, 1);
 	ASSERT_EQ(CPU68.CCR.bitmask.user.C, 1);
